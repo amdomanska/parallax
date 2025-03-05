@@ -4,6 +4,7 @@ export const ParallaxSimulation = () => {
   const mainCanvasRef = useRef(null);
   const viewCanvasRef = useRef(null);
   const [distance, setDistance] = useState(1);
+  const inclination = 7;
 
   useEffect(() => {
     const mainCanvas = mainCanvasRef.current;
@@ -19,7 +20,7 @@ export const ParallaxSimulation = () => {
     backgroundImg.src = '/assets/images/star_field.png';
 
     // Constants and variables
-    let xE;
+    let xE, yE;
     let d_pc, d_pix;
     let xO = 0, yO;
     let theta_deg = 0;
@@ -44,8 +45,8 @@ export const ParallaxSimulation = () => {
       distToPix();
     
       // Earth position relative to top-left
-      let xE_tl =  xSun + xE;
-      let yE_tl =  ySun;
+      let xE_tl =  xSun + xE
+      let yE_tl =  ySun + yE
     
       // Object position relative to top-left
       let xO_tl = xSun + xO
@@ -228,6 +229,7 @@ export const ParallaxSimulation = () => {
       theta_deg %= 360;
       const theta_rad = theta_deg * Math.PI / 180;
       xE = R * Math.sin(theta_rad);
+      yE = R * Math.cos(theta_rad) * Math.sin(inclination * Math.PI / 180);
 
       drawAll();
 
