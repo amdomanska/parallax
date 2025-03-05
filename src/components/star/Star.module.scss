@@ -1,0 +1,8 @@
+.starIcon {
+    animation: twinkle .75s infinite alternate ease-in-out; 
+}
+
+@keyframes twinkle {
+  0% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
