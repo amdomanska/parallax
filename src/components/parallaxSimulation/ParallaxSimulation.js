@@ -1,25 +1,25 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { roundToTwoDigits } from '../../lib';
 
-const canvasWidth = 300;
-const canvasHeight = 400;
+const canvasWidth = window.innerWidth*0.4;
+const canvasHeight = window.innerHeight*0.8;
 
 export const ParallaxSimulation = ({distance_pc, px}) => {
 
 // Constants and variables
   const dTheta_deg = 1;
   const yOMin = 70;
-  const yOMax = 230;
-  const xSun = 150;
-  const ySun = 340;
+  const yOMax = canvasHeight-80;
+  const xSun = canvasWidth/2;
+  const ySun = canvasHeight-50;
   const annOff = 60;
   const inc_deg = 7;
 
 
   const objectPos = (d_pc) => {
     // Distance in parsecs
-    const A = 500; // Adjust based on visualization size
-    const B = 850; // Adjust based on visualization offset
+    const A = 1; // Adjust based on visualization size
+    const B = 0; // Adjust based on visualization offset
 
     // Define minimum and maximum distances in parsecs
     const dMin_pc = 3.4;
@@ -73,6 +73,7 @@ export const ParallaxSimulation = ({distance_pc, px}) => {
   // Load images once
   const sunImg = useRef(new Image());
   const bgImg = useRef(new Image());
+  console.log(sunImg.current.width);
 
   useEffect(() => {
     sunImg.current.src = '/assets/images/sun.png';
@@ -150,7 +151,7 @@ export const ParallaxSimulation = ({distance_pc, px}) => {
     ctx.fillStyle = "yellow";
     ctx.font = "14px Verdana";
     ctx.textAlign="start"; 
-    var annTxt = "Angle = " + parAngle_asec.toFixed(2) + "''"
+    var annTxt = "Angle = " + parAngle_asec.toFixed(3) + "''"
     ctx.fillText(annTxt, xO_tl+annOff*Math.sin(ang)+ annOff*0.1,
                   yO_tl-annOff*Math.cos(ang)/2);
   };
@@ -212,7 +213,7 @@ export const ParallaxSimulation = ({distance_pc, px}) => {
             canvasHeight-8)
   }
 
-  const annotate = (ctx, text, top, left) => {
+  const annotate = (ctx, text, left, top) => {
     // Final annotations
     ctx.beginPath();
     ctx.fillStyle = "white";
@@ -259,23 +260,22 @@ export const ParallaxSimulation = ({distance_pc, px}) => {
 
     const drawAll = () => {
 
-      const { R, yO, d_pix } = animationParamsRef.current;
-    
+  
       // Earth position relative to top-left
       let xE_tl =  xSun + xE.current;
       let yE_tl =  ySun + yE.current;
     
       // Object position relative to top-left
       let xO_tl = xSun;
-      let yO_tl = yO;
+      let yO_tl = animationParamsRef.current.yO;
 
       // Projected object motion
-      let R1 = R * yO / d_pix
-      let theta_rad = theta_deg.current * Math.PI / 180
-      let xP = R1 * Math.sin(-theta_rad)
-      let yP = R1 * Math.cos(theta_rad) * Math.cos(inc_deg * Math.PI / 180)
-      let xP_tl = canvasWidth/2 + xP
-      let yP_tl = canvasHeight/2 + yP
+      let R1 = animationParamsRef.current.R * animationParamsRef.current.yO / animationParamsRef.current.d_pix;
+      let theta_rad = theta_deg.current * Math.PI / 180;
+      let xP = R1 * Math.sin(-theta_rad);
+      let yP = R1 * Math.cos(theta_rad) * Math.cos(inc_deg * Math.PI / 180);
+      let xP_tl = canvasWidth/2 + xP;
+      let yP_tl = canvasHeight/2 + yP;
 
       ctx1.fillStyle = "orange";
       ctx1.font = "14px Verdana";
@@ -286,7 +286,7 @@ export const ParallaxSimulation = ({distance_pc, px}) => {
       drawBackground(ctx2);
       drawFarEarthOrbit(ctx1);
       drawSun(ctx1);
-      drawObject(ctx1, xSun, yO);
+      drawObject(ctx1, xSun, animationParamsRef.current.yO);
       drawEarth(ctx1, xSun + xE.current, ySun + yE.current);
       drawAngleSweepLine(ctx1, xO_tl, yO_tl, xE_tl, yE_tl);
       drawForegroundObject(ctx1, xO_tl, yO_tl);
@@ -295,10 +295,12 @@ export const ParallaxSimulation = ({distance_pc, px}) => {
       drawProjectedAngleLine(ctx2, R1);
       drawViewOfObject(ctx2, xP_tl, yP_tl);
       printMonths(ctx2);
-      annotate(ctx1, "Not to scale.", 8, canvasWidth - 8)
-      annotate(ctx1, "Background stars.", 8, 12 + 8)
+      annotate(ctx1, "Not to scale.", 8, canvasHeight - 8)
+      annotate(ctx1, "Background stars.", 8, 20)
       annotate(ctx2, "View from Earth through a telescope.",
-                canvasHeight/2, 12 + 8)  
+                10, 20)  
+      const distInLY = distance_pc*3.26;
+      annotate(ctx2, "Distance: " + distInLY.toFixed(2) + " Light Years", 10, 40)
      
     };
 
@@ -334,8 +336,8 @@ export const ParallaxSimulation = ({distance_pc, px}) => {
 
   return (
     <div>
-      <canvas ref={mainCanvasRef} id="mainCanvas" width={300} height={400} />
-      <canvas ref={viewCanvasRef} id="viewCanvas" width={300} height={400} />
+      <canvas ref={mainCanvasRef} id="mainCanvas" width={canvasWidth} height={canvasHeight} />
+      <canvas ref={viewCanvasRef} id="viewCanvas" width={canvasWidth} height={canvasHeight} />
     </div>
   );
 };
