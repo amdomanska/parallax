@@ -22,7 +22,7 @@ export const Star = ({ pos, mag, color, hip_id, ra, dec, getStarDetails}) => {
         <g 
             id={hip_id}
             className="star"
-            onPointerDown={() => getStarDetails({hip_id, ra, dec})} 
+            onPointerDown={() => getStarDetails(hip_id)} 
             transform={`
                 translate(${x},${y}) 
                 rotate(${Math.random() * 30})

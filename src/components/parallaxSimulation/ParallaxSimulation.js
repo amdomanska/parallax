@@ -1,12 +1,17 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { roundToTwoDigits } from '../../lib';
 
-export const ParallaxSimulation = () => {
+export const ParallaxSimulation = ({distance_pc, px}) => {
   const mainCanvasRef = useRef(null);
   const viewCanvasRef = useRef(null);
-  const [distance, setDistance] = useState(1);
+  const animationFrameId = useRef(null);
+  const isMounted = useRef(false);
   const inclination = 7;
+  console.log("Distance: ", distance_pc);
+  console.log("Parallax: ", px);
 
   useEffect(() => {
+    isMounted.current = true;
     const mainCanvas = mainCanvasRef.current;
     const viewCanvas = viewCanvasRef.current;
     const ctx1 = mainCanvas.getContext('2d');
@@ -20,29 +25,55 @@ export const ParallaxSimulation = () => {
     backgroundImg.src = '/assets/images/star_field.png';
 
     // Constants and variables
-    let xE, yE;
-    let d_pc, d_pix;
+    let xE = 0;
+    let yE = 0;
+    let d_pix;
     let xO = 0, yO;
     let theta_deg = 0;
     const dTheta_deg = 1;
-    const R = 60;
-    const yOMin = 70, yOMax = 230;
-    const xSun = 150, ySun = 340;
+    let R;
+    const yOMin = 70;
+    const yOMax = 230;
+    const xSun = 150;
+    const ySun = 340;
     const annOff = 60;
     const inc_deg = 7;
 
-    const distToPix = () => {
-      d_pc = distance;
-      const dMin_pc = 1;
-      const dMax_pc = 10;
-      const tmp = (d_pc - dMin_pc) * (yOMax - yOMin) / (dMax_pc - dMin_pc);
+    const distToPix = (d_pc) => {
+      // Distance in parsecs
+      const A = 500; // Adjust based on visualization size
+      const B = 850; // Adjust based on visualization offset
+  
+      // Define minimum and maximum distances in parsecs
+      const dMin_pc = 3.4;
+      const dMax_pc = 8401;
+  
+      // Apply logarithmic transformation to distances
+      const log_d_pc = A * Math.log10(d_pc) + B;
+      const log_dMin_pc = A * Math.log10(dMin_pc) + B;
+      const log_dMax_pc = A * Math.log10(dMax_pc) + B;
+  
+      // Map logarithmic distance to pixel range
+      const tmp = (log_d_pc - log_dMin_pc) * (yOMax - yOMin) / (log_dMax_pc - log_dMin_pc);
       yO = yOMax - tmp;
-      d_pix = ySun - yO;
-    };
+  
+      // Calculate pixel distance
+      return ySun - yO;
+  };
+
+    const RtoPix = (d_pc) => {
+      const a = distToPix(1);
+      const b = distToPix(0.5);
+      const R = a - b;
+      console.log(R);
+      return R;
+    }
+  
 
     const drawAll = () => {
       // Update the object distance from the slider
-      distToPix();
+      d_pix = distToPix(distance_pc);
+      R = RtoPix(distance_pc);
     
       // Earth position relative to top-left
       let xE_tl =  xSun + xE
@@ -113,7 +144,7 @@ export const ParallaxSimulation = () => {
 
       // Draw the angle annotation
       const ang = Math.atan(R/d_pix)
-      const parAngle_asec = 1/(d_pc)
+      const parAngle_asec = px/8401;
       const xArcEnd = xO_tl + annOff * Math.sin(ang)
       const yArcEnd = yO_tl- annOff * Math.cos(ang)
       ctx1.beginPath();
@@ -225,6 +256,8 @@ export const ParallaxSimulation = () => {
       }
 
     const animate = () => {
+      if (!isMounted.current) return;
+      animationFrameId.current = requestAnimationFrame(animate);
       theta_deg += dTheta_deg;
       theta_deg %= 360;
       const theta_rad = theta_deg * Math.PI / 180;
@@ -240,39 +273,35 @@ export const ParallaxSimulation = () => {
         drawSun();
         drawNearEarthOrbit();
       }
-
-      requestAnimationFrame(animate);
     };
 
-    sunImg.onload = () => {
-        backgroundImg.onload = () => {
-          animate();
-        };
-      };
+    let imagesLoaded = 0;
+    const totalImages = 2;
+
+    const startAnimationIfReady = () => {
+        imagesLoaded++;
+        if (imagesLoaded === totalImages) {
+            R = RtoPix(distance_pc);
+            animate();
+        }
+    };
+
+    sunImg.onload = startAnimationIfReady;
+    backgroundImg.onload = startAnimationIfReady;
   
     // Cleanup function
     return () => {
-      // Cancel animation frame if needed
+      isMounted.current = false; // Ensure no more frames are scheduled
+      if (animationFrameId.current) {
+        cancelAnimationFrame(animationFrameId.current); // ✅ Properly cancels animation
+      }
     };
-  }, [distance]);
+  }, [distance_pc, px]);
 
   return (
     <div>
       <canvas ref={mainCanvasRef} id="mainCanvas" width={300} height={400} />
       <canvas ref={viewCanvasRef} id="viewCanvas" width={300} height={400} />
-      <div>
-        <label>
-          Distance:
-          <input
-            type="range"
-            min="1"
-            max="10"
-            value={distance}
-            onChange={(e) => setDistance(Number(e.target.value))}
-          />
-          {distance}
-        </label>
-      </div>
     </div>
   );
 };

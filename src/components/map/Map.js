@@ -26,7 +26,6 @@ export const Map = ({ data, constellations, getStarDetails }) => {
     const minValue = Math.min(...data.map(d => d.mag));
     const maxValue = Math.max(...data.map(d => d.mag));
 
-
     const scaleOpacity  = scaleLog()
     .domain([minValue, maxValue])
     .range([minOpacity, maxOpacity]);
@@ -70,7 +69,6 @@ export const Map = ({ data, constellations, getStarDetails }) => {
 
                 const translateX = (x - cursorX) * scale + cursorX;
                 const translateY = (y - cursorY) * scale + cursorY;
-                console.log(translateX, translateY);
                 node.setAttribute("transform", `translate(${translateX}, ${translateY}) scale(${scaleX}, ${scaleY}) rotate(${Math.random() * 30})`);
             });
             

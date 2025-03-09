@@ -10,7 +10,7 @@ import './App.css';
 
 const App = () => {
     const data = useStarsData();
-    const [starDetailed, setStarDetailed] = useState(null);
+    const [starDetails, setStarDetails] = useState(null);
     const constellations = useConstellationsData();
 
     if (!data || !constellations) {
@@ -20,11 +20,8 @@ const App = () => {
     return (
         <div>
             <div id="container" className="container-horizontal">
-                {/* <Map data={data} constellations={constellations} getStarDetails={star => setStarDetailed(star)}/>                
-                <div className="stars-info" style={{backgroundColor: "black", color: "white", padding: "10px", height: height, width: "6rem", display: "none"}}>
-                    <StarInfo star={starDetailed}/>
-                </div> */}
-                <ParallaxSimulation />
+                {!starDetails && <Map data={data} constellations={constellations} getStarDetails={star => setStarDetails(star)}/>                }
+                {starDetails && <div onClick={() => setStarDetails(null)} ><ParallaxSimulation distance_pc={starDetails.dist} px={starDetails.parallax} /> </div>}
             </div>
         </div>
     );
