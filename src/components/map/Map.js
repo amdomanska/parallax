@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { Star } from "../star/Star";
-import { geoAzimuthalEquidistant, geoPath, geoGraticule, geoCircle, scaleLog, zoom, select, min, pointer} from "d3";
+import { geoAzimuthalEquidistant, geoPath, geoGraticule, geoCircle, scaleLog, scaleSqrt, zoom, select, min, pointer, histogram} from "d3";
 import { Constellations } from "../constellations/Constellations";
 
 import styles from './Map.module.scss';
@@ -18,21 +18,21 @@ export const Map = ({ data, constellations, getStarDetails }) => {
     const gRef = useRef(null); // Reference to SVG for event handling
     const svgRef = useRef(null);
     
-    const minOpacity = 1;
-    const maxOpacity = 0.3;
+    const minOpacity = 0.1;
+    const maxOpacity = 1;
     const minSize = 5;
-    const maxSize = 15;
+    const maxSize = 30;
 
     const minValue = Math.min(...data.map(d => d.mag));
     const maxValue = Math.max(...data.map(d => d.mag));
 
-    const scaleOpacity  = scaleLog()
+    const scaleOpacity  = scaleSqrt()
     .domain([minValue, maxValue])
-    .range([minOpacity, maxOpacity]);
+    .range([maxOpacity, minOpacity]);
 
-    const scaleSize = scaleLog()
+    const scaleSize = scaleSqrt()
         .domain([minValue, maxValue])
-        .range([minSize, maxSize]);
+        .range([maxSize, minSize]);
 
     const outline = geoCircle().radius(90).center([0, 90])();
     const graticule = geoGraticule().stepMinor([30, 20])();
@@ -44,46 +44,6 @@ export const Map = ({ data, constellations, getStarDetails }) => {
                         .precision(0.1);
 
     const gPath = geoPath().projection(projection);
-
-    useEffect(() => {
-        const g = select(gRef.current);
-        const svg = select(svgRef.current);
-        
-        const zoomed = (event) => {
-            const [cursorX, cursorY] = pointer(event, svg.node());
-            // g.attr("transform", transform);
-            const scale = event.transform.k;
-            const updatedProjection = projection.scale(initialScale * scale); 
-                    
-            g.selectAll(".star").nodes().forEach((node) => {
-                const star = data.filter(d => d.hip_id === node.id)[0];
-                const ra = star.ra;
-                const dec = star.dec;
-                const starSize = scaleSize(star.mag);
-                const starSvgSize = { width: 471, height: 477 };
-    
-                const scaleX = starSize / starSvgSize.width;
-                const scaleY = starSize / starSvgSize.height;
-
-                const [x, y] = updatedProjection([ra, dec]);
-
-                const translateX = (x - cursorX) * scale + cursorX;
-                const translateY = (y - cursorY) * scale + cursorY;
-                node.setAttribute("transform", `translate(${translateX}, ${translateY}) scale(${scaleX}, ${scaleY}) rotate(${Math.random() * 30})`);
-            });
-            
-            const updatedPath = geoPath().projection(updatedProjection); // Create a new path generator with the updated projection
-
-            g.select("#graticules").attr("d", updatedPath(graticule));
-        };
-
-        const myZoom = zoom()
-            .scaleExtent([1,3])
-            .on("zoom", zoomed);
-
-        svg.call(myZoom);
-
-    }, []);
 
     const getStarData = (hip_id) => {
         let star = data.find(d => d.hip_id === hip_id);
@@ -119,13 +79,14 @@ export const Map = ({ data, constellations, getStarDetails }) => {
                                 ra = {d.ra}
                                 dec = {d.dec}
                                 mag={{opacity: scaleOpacity(d.mag), size: scaleSize(d.mag)}}
-                                color={d.bv ? d.bv :  'white'}
+                                color={d.color}
                                 hip_id={d.hip_id}
                                 getStarDetails={getStarData}
                             />
                         ))
                     }
                 </g>
+                <Constellations constellationsData={constellations} geoPath={gPath} />
             </g>
         </svg>
     );

@@ -4,7 +4,7 @@ import { roundToTwoDigits } from '../../lib';
 const canvasWidth = window.innerWidth*0.4;
 const canvasHeight = window.innerHeight*0.8;
 
-export const ParallaxSimulation = ({distance_pc, px}) => {
+export const ParallaxSimulation = ({distance_pc, px, color}) => {
 
 // Constants and variables
   const dTheta_deg = 1;
@@ -53,8 +53,6 @@ export const ParallaxSimulation = ({distance_pc, px}) => {
     yE.current = animationParamsRef.current.R * Math.cos(theta_rad) * Math.sin(inc_deg * Math.PI / 180);
   };
 
-  console.log("Distance: ", distance_pc);
-  console.log("Parallax: ", px);
   const mainCanvasRef = useRef(null);
   const viewCanvasRef = useRef(null);
   const animationFrameId = useRef(null);
@@ -73,7 +71,6 @@ export const ParallaxSimulation = ({distance_pc, px}) => {
   // Load images once
   const sunImg = useRef(new Image());
   const bgImg = useRef(new Image());
-  console.log(sunImg.current.width);
 
   useEffect(() => {
     sunImg.current.src = '/assets/images/sun.png';
@@ -112,7 +109,7 @@ export const ParallaxSimulation = ({distance_pc, px}) => {
     ctx.arc(xO_tl, yO_tl, 5, 0, 2 * Math.PI);
     const grad = ctx.createRadialGradient(xO_tl - 1, yO_tl - 2, 1, xO_tl, yO_tl, 5);
     grad.addColorStop(0, "white");
-    grad.addColorStop(1, "green");
+    grad.addColorStop(1, color);
     ctx.fillStyle = grad;
     ctx.fill();
   };
@@ -124,7 +121,7 @@ export const ParallaxSimulation = ({distance_pc, px}) => {
     const grad = ctx.createRadialGradient(xO_tl-1, yO_tl-2, 1,
                                          xO_tl, yO_tl, 5);
     grad.addColorStop(0, "white");
-    grad.addColorStop(1, "green");
+    grad.addColorStop(1, color);
     ctx.fillStyle = grad;
     ctx.fill();
   };
@@ -151,7 +148,7 @@ export const ParallaxSimulation = ({distance_pc, px}) => {
     ctx.fillStyle = "yellow";
     ctx.font = "14px Verdana";
     ctx.textAlign="start"; 
-    var annTxt = "Angle = " + parAngle_asec.toFixed(3) + "''"
+    var annTxt = "Parallax Angle = " + parAngle_asec.toFixed(3) + "''"
     ctx.fillText(annTxt, xO_tl+annOff*Math.sin(ang)+ annOff*0.1,
                   yO_tl-annOff*Math.cos(ang)/2);
   };
@@ -196,7 +193,7 @@ export const ParallaxSimulation = ({distance_pc, px}) => {
     const grad = ctx.createRadialGradient(xP_tl-1, yP_tl-2, 1,
                                           xP_tl, yP_tl, 5);
     grad.addColorStop(0, "white");
-    grad.addColorStop(1, "green");
+    grad.addColorStop(1, color);
     ctx.fillStyle = grad;
     ctx.fill();
   }
@@ -299,9 +296,6 @@ export const ParallaxSimulation = ({distance_pc, px}) => {
       annotate(ctx1, "Background stars.", 8, 20)
       annotate(ctx2, "View from Earth through a telescope.",
                 10, 20)  
-      const distInLY = distance_pc*3.26;
-      annotate(ctx2, "Distance: " + distInLY.toFixed(2) + " Light Years", 10, 40)
-     
     };
 
     const animate = () => {
