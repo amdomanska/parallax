@@ -73,10 +73,10 @@ export const ParallaxSimulation = ({distance_pc, px, color}) => {
   const bgImg = useRef(new Image());
 
   useEffect(() => {
-    sunImg.current.src = '/assets/images/sun.png';
+    sunImg.current.src = `/assets/images/sun.png`;
     sunImg.current.onload = () => setSunImgLoaded(true);
 
-    bgImg.current.src = '/assets/images/star_field.png';
+    bgImg.current.src = `/assets/images/star_field.png`;
     bgImg.current.onload = () => setBgImgLoaded(true);
   }, []);
 

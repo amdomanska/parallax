@@ -50,6 +50,8 @@ export const Map = ({ data, constellations, getStarDetails }) => {
         getStarDetails(star);
     };
 
+    const starmapImgPath = `/assets/images/starmap.jpg`
+
     return (
 
         <svg 
@@ -61,7 +63,7 @@ export const Map = ({ data, constellations, getStarDetails }) => {
             >
             <defs>
                 <pattern id="image-fill" x="0" y="0" width={dimention} height={dimention} patternUnits="userSpaceOnUse">
-                    <image href="/assets/images/starmap.jpg" x="0" y="0" width={dimention} height={dimention} preserveAspectRatio="xMidYMid slice"></image>
+                    <image href={starmapImgPath} x="0" y="0" width={dimention} height={dimention} preserveAspectRatio="xMidYMid slice"></image>
                 </pattern>
                 <clipPath id="map-clip">
                     <path d={gPath(outline)} />
