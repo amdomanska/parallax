@@ -5,7 +5,7 @@ export const useConstellationsData = () => {
     const [data, setData] = useState(null);
     
     useEffect(() => {
-        json(`${process.env.PUBLIC_URL}/assets/data/constellations.json`).then(setData);
+        json(`/assets/data/constellations.json`).then(setData);
       }, []);
       
       return data;
