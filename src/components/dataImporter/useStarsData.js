@@ -57,7 +57,7 @@ export const useStarsData = () => {
       d.color = bvToColor(d.bv);
       return d;
     }
-    csv('${process.env.PUBLIC_URL}/assets/data/result.csv', row).then((data) => {
+    csv(`${process.env.PUBLIC_URL}/assets/data/result.csv`, row).then((data) => {
       const northernHemisphereStars = data.filter(d => d.dec >= 0);
       const starsWithNames = northernHemisphereStars.filter(star => star.name !== null && star.name !== '');
       setData(northernHemisphereStars);
