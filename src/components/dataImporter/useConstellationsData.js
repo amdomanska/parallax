@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { json } from "d3";
 
-export const useConstellationsData = (url) => {
+export const useConstellationsData = () => {
     const [data, setData] = useState(null);
     
     useEffect(() => {
